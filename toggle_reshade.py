@@ -160,5 +160,6 @@ for game_path in games_with_reshade:
     handle_game_with_reshade(game_path, reshade_status)
 
 # Check if ReShade is not installed or disabled and ask the user to install it
-reshade_setup_path = r"C:\Users\OlegP\Downloads\ReShade_Setup_5.7.0.exe"
+userprofile = os.environ['USERPROFILE']
+reshade_setup_path = os.path.join(userprofile, 'Downloads', 'ReShade_Setup_5.7.0.exe')
 
