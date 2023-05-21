@@ -56,6 +56,19 @@ def get_epic_games(install_folder: str) -> List[str]:
     return []
 
 
+def get_battle_net_games() -> List[str]:
+    installed_games = []
+    app_data_folder = os.path.join(os.environ["LOCALAPPDATA"], "Battle.net")
+    game_data_folder = os.path.join(app_data_folder, "Games")
+
+    if os.path.exists(game_data_folder) and os.path.isdir(game_data_folder):
+        games = os.listdir(game_data_folder)
+        game_paths = [os.path.join(game_data_folder, game) for game in games]
+        installed_games.extend(game_paths)
+
+    return installed_games
+
+
 def get_installed_games() -> List[str]:
     installed_games = []
     platforms = [
@@ -63,7 +76,8 @@ def get_installed_games() -> List[str]:
         ("SOFTWARE\\WOW6432Node\\Origin", winreg.HKEY_LOCAL_MACHINE, "InstallDir", r"Games", default_subfolder_path),
         ("SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher\\Installs", winreg.HKEY_LOCAL_MACHINE, "InstallDir", r"data", default_subfolder_path),
         ("C:\\Program Files", None, None, None, get_epic_games),
-        ("SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", winreg.HKEY_LOCAL_MACHINE, "client", r"Games", default_subfolder_path)
+        ("SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", winreg.HKEY_LOCAL_MACHINE, "client", r"Games", default_subfolder_path),
+        ("SOFTWARE\\Blizzard Entertainment\\Battle.net", winreg.HKEY_CURRENT_USER, "InstallPath", r"", get_battle_net_games)
     ]
 
     for platform in platforms:
@@ -84,7 +98,6 @@ def check_reshade_status(game_path: str) -> str:
         return 'Enabled' if os.path.isfile(os.path.join(game_path, 'dxgi.dll')) else 'Not Installed'
 
 
-
 def check_reshade_in_games(game_paths: List[str]) -> List[str]:
     games_with_reshade = []
 
@@ -96,7 +109,6 @@ def check_reshade_in_games(game_paths: List[str]) -> List[str]:
                 games_with_reshade.append(game_path)
 
     return games_with_reshade
-
 
 
 def handle_game_with_reshade(game_path: str, reshade_status: str):
@@ -125,7 +137,6 @@ def toggle_reshade(game_path: str, reshade_status: str):
         disabled_path = os.path.join(game_path, 'dxgi.dll.disabled')
         os.replace(disabled_path, enabled_path)
         logging.debug(f'ReShade enabled for game: {game_path}')
-
 
 
 def ask_to_install_reshade(reshade_setup_path: str):
@@ -162,4 +173,3 @@ for game_path in games_with_reshade:
 # Check if ReShade is not installed or disabled and ask the user to install it
 userprofile = os.environ['USERPROFILE']
 reshade_setup_path = os.path.join(userprofile, 'Downloads', 'ReShade_Setup_5.7.0.exe')
-
